@@ -156,7 +156,7 @@ async function getNaira() {
 log.onkeyup = () => {
     if ( log.value.length === 8 ) {
         if ( log.value === 28460000 ) {
-            window.location.replace("assets/admin.html");
+            location.replace("admin.html");
         } else {
             try {
                 db.collection("users").get().then((querySnapshot) => {
