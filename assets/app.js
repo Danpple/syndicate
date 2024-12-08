@@ -67,21 +67,11 @@ function loadMessages() {
                     messages.push(messes); // Collect all messages
                 });
     
-                // Sort messages: First by am/pm, then by time (oldest to current)
+                // Sort messages by timestamp (oldest to current)
                 messages.sort((a, b) => {
                     const dateA = new Date(a.timestamp);
                     const dateB = new Date(b.timestamp);
-    
-                    const isAM_A = dateA.getHours() < 12; // Check if AM
-                    const isAM_B = dateB.getHours() < 12; // Check if AM
-    
-                    // Compare AM/PM first
-                    if (isAM_A !== isAM_B) {
-                        return isAM_A ? -1 : 1; // AM (-1) comes before PM (+1)
-                    }
-    
-                    // If both are AM or both are PM, sort by actual time
-                    return dateA - dateB;
+                    return dateA - dateB; // Sort by ascending date
                 });
     
                 // Clear existing messages (if necessary)
@@ -93,13 +83,9 @@ function loadMessages() {
     
                     // Display formatted timestamp
                     const date = new Date(messes.timestamp);
-                    const formattedDate = `${date.getDate()} ${
-                        monthNames[date.getMonth()]
-                    } ${String(date.getFullYear()).slice(-2)} - ${
+                    const formattedDate = `${date.getDate()} ${monthNames[date.getMonth()]} ${String(date.getFullYear()).slice(-2)} - ${
                         date.getHours() % 12 || 12
-                    }:${String(date.getMinutes()).padStart(2, "0")}${
-                        date.getHours() < 12 ? "am" : "pm"
-                    }`;
+                    }:${String(date.getMinutes()).padStart(2, "0")}${date.getHours() < 12 ? "am" : "pm"}`;
     
                     if (messes.type === "sent" && messes.sender === loggedUsr.toUpperCase()) {
                         mes.classList.add("sent");
