@@ -57,20 +57,37 @@ function loadMessages() {
     mesLists.innerHTML = ""; // Clear the list before fetching new data
 
     try {
-        db.collection("messages").get().then((querySnapshot) => {
-            querySnapshot.forEach((doc) => {
-                const messes = doc.data();
-                const mes = document.createElement("li");
-                if ( messes.type === "sent" && messes.sender === loggedUsr.toUpperCase() ) {
-                    mes.classList.add("sent");
-                    mes.innerHTML = `<span>${messes.sender}</span> ${messes.text} <span>${messes.timestamp}</span>`;
-                } else {
-                    mes.classList.add("received");
-                    mes.innerHTML = `<span>${messes.sender}</span> ${messes.text} <span>${messes.timestamp}</span>`;
-                }
-                mesLists.appendChild(mes);
+        db.collection("messages")
+            .get()
+            .then((querySnapshot) => {
+                // Collect all messages into an array
+                const messages = [];
+                querySnapshot.forEach((doc) => {
+                    messages.push(doc.data());
+                });
+    
+                // Sort messages by date (old to current)
+                messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    
+                // Clear the current list
+                mesLists.innerHTML = "";
+    
+                // Append sorted messages to the list
+                messages.forEach((messes) => {
+                    const mes = document.createElement("li");
+                    if (messes.type === "sent" && messes.sender === loggedUsr.toUpperCase()) {
+                        mes.classList.add("sent");
+                        mes.innerHTML = `<span>${messes.sender}</span> ${messes.text} <span>${new Date(messes.timestamp).toLocaleString()}</span>`;
+                    } else {
+                        mes.classList.add("received");
+                        mes.innerHTML = `<span>${messes.sender}</span> ${messes.text} <span>${new Date(messes.timestamp).toLocaleString()}</span>`;
+                    }
+                    mesLists.appendChild(mes);
+                });
+            })
+            .catch((error) => {
+                console.error("Error fetching messages:", error);
             });
-        });
     } catch (error) {
         console.error("Error fetching users:", error);
     }
