@@ -60,28 +60,32 @@ function loadMessages() {
         db.collection("messages")
             .get()
             .then((querySnapshot) => {
-                // Collect all messages into an array
                 const messages = [];
                 querySnapshot.forEach((doc) => {
                     messages.push(doc.data());
                 });
     
-                // Sort messages by date (old to current)
-                messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+                // Sort by timestamp
+                messages.sort((a, b) => {
+                    const dateA = a.timestamp.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
+                    const dateB = b.timestamp.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
+                    return dateA - dateB;
+                });
     
-                // Clear the current list
-                mesLists.innerHTML = "";
-    
-                // Append sorted messages to the list
+                // Render messages
                 messages.forEach((messes) => {
                     const mes = document.createElement("li");
+                    const date = messes.timestamp.toDate ? messes.timestamp.toDate() : new Date(messes.timestamp);
+                    const formattedDate = date.toLocaleString();
+    
                     if (messes.type === "sent" && messes.sender === loggedUsr.toUpperCase()) {
                         mes.classList.add("sent");
-                        mes.innerHTML = `<span>${messes.sender}</span> ${messes.text} <span>${new Date(messes.timestamp).toLocaleString()}</span>`;
+                        mes.innerHTML = `<span>${messes.sender}</span> ${messes.text} <span>${formattedDate}</span>`;
                     } else {
                         mes.classList.add("received");
-                        mes.innerHTML = `<span>${messes.sender}</span> ${messes.text} <span>${new Date(messes.timestamp).toLocaleString()}</span>`;
+                        mes.innerHTML = `<span>${messes.sender}</span> ${messes.text} <span>${formattedDate}</span>`;
                     }
+    
                     mesLists.appendChild(mes);
                 });
             })
@@ -118,7 +122,7 @@ function sendMessage() {
         const mesDetails = {
             text: txt,
             sender: loggedUsr.toUpperCase(),
-            timestamp: `${formatDate()}`,
+            timestamp: new Date().toISOString(),
             type: "sent"
         }
 
