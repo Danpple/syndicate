@@ -156,7 +156,7 @@ async function getNaira() {
 log.onkeyup = () => {
     if ( log.value.length === 8 ) {
         if ( log.value === 28460000 ) {
-            window.location.replace("https://danpple.github.io/syndicate/assets/admin");
+            window.location.replace("assets/admin.html");
         } else {
             try {
                 db.collection("users").get().then((querySnapshot) => {
