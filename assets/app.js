@@ -57,41 +57,20 @@ function loadMessages() {
     mesLists.innerHTML = ""; // Clear the list before fetching new data
 
     try {
-        db.collection("messages")
-            .get()
-            .then((querySnapshot) => {
-                const messages = [];
-                querySnapshot.forEach((doc) => {
-                    messages.push(doc.data());
-                });
-    
-                // Sort by timestamp
-                messages.sort((a, b) => {
-                    const dateA = a.timestamp.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
-                    const dateB = b.timestamp.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
-                    return dateA - dateB;
-                });
-    
-                // Render messages
-                messages.forEach((messes) => {
-                    const mes = document.createElement("li");
-                    const date = messes.timestamp.toDate ? messes.timestamp.toDate() : new Date(messes.timestamp);
-                    const formattedDate = date.toLocaleString();
-    
-                    if (messes.type === "sent" && messes.sender === loggedUsr.toUpperCase()) {
-                        mes.classList.add("sent");
-                        mes.innerHTML = `<span>${messes.sender}</span> ${messes.text} <span>${formattedDate}</span>`;
-                    } else {
-                        mes.classList.add("received");
-                        mes.innerHTML = `<span>${messes.sender}</span> ${messes.text} <span>${formattedDate}</span>`;
-                    }
-    
-                    mesLists.appendChild(mes);
-                });
-            })
-            .catch((error) => {
-                console.error("Error fetching messages:", error);
+        db.collection("messages").get().then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+                const messes = doc.data();
+                const mes = document.createElement("li");
+                if ( messes.type === "sent" && messes.sender === loggedUsr.toUpperCase() ) {
+                    mes.classList.add("sent");
+                    mes.innerHTML = `<span>${messes.sender}</span> ${messes.text} <span>${messes.timestamp}</span>`;
+                } else {
+                    mes.classList.add("received");
+                    mes.innerHTML = `<span>${messes.sender}</span> ${messes.text} <span>${messes.timestamp}</span>`;
+                }
+                mesLists.appendChild(mes);
             });
+        });
     } catch (error) {
         console.error("Error fetching users:", error);
     }
@@ -122,7 +101,7 @@ function sendMessage() {
         const mesDetails = {
             text: txt,
             sender: loggedUsr.toUpperCase(),
-            timestamp: new Date().toISOString(),
+            timestamp: `${formatDate()}`,
             type: "sent"
         }
 
