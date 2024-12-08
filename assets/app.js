@@ -57,22 +57,52 @@ function loadMessages() {
     mesLists.innerHTML = ""; // Clear the list before fetching new data
 
     try {
-        db.collection("messages").get().then((querySnapshot) => {
-            querySnapshot.forEach((doc) => {
-                const messes = doc.data();
-                const mes = document.createElement("li");
-                if ( messes.type === "sent" && messes.sender === loggedUsr.toUpperCase() ) {
-                    mes.classList.add("sent");
-                    mes.innerHTML = `<span>${messes.sender}</span> ${messes.text} <span>${messes.timestamp}</span>`;
-                } else {
-                    mes.classList.add("received");
-                    mes.innerHTML = `<span>${messes.sender}</span> ${messes.text} <span>${messes.timestamp}</span>`;
-                }
-                mesLists.appendChild(mes);
+        db.collection("messages")
+            .get()
+            .then((querySnapshot) => {
+                const messages = []; // Array to store all messages
+    
+                querySnapshot.forEach((doc) => {
+                    const messes = doc.data();
+                    messages.push(messes); // Collect all messages
+                });
+    
+                // Sort messages by timestamp (oldest to current)
+                messages.sort((a, b) => {
+                    const dateA = new Date(a.timestamp);
+                    const dateB = new Date(b.timestamp);
+                    return dateA - dateB; // Sort by ascending date
+                });
+    
+                // Clear existing messages (if necessary)
+                mesLists.innerHTML = "";
+    
+                // Render messages
+                messages.forEach((messes) => {
+                    const mes = document.createElement("li");
+    
+                    // Display formatted timestamp
+                    const date = new Date(messes.timestamp);
+                    const formattedDate = `${date.getDate()} ${monthNames[date.getMonth()]} ${String(date.getFullYear()).slice(-2)} - ${
+                        date.getHours() % 12 || 12
+                    }:${String(date.getMinutes()).padStart(2, "0")}${date.getHours() < 12 ? "am" : "pm"}`;
+    
+                    if (messes.type === "sent" && messes.sender === loggedUsr.toUpperCase()) {
+                        mes.classList.add("sent");
+                        mes.innerHTML = `<span>${messes.sender}</span> ${messes.text} <span>${formattedDate}</span>`;
+                    } else {
+                        mes.classList.add("received");
+                        mes.innerHTML = `<span>${messes.sender}</span> ${messes.text} <span>${formattedDate}</span>`;
+                    }
+    
+                    mesLists.appendChild(mes);
+                });
+            })
+            .catch((error) => {
+                console.error("Error fetching messages:", error);
             });
-        });
     } catch (error) {
-        console.error("Error fetching users:", error);
+        console.error("Error fetching messages:", error);
     }
 }
 function formatDate() {
